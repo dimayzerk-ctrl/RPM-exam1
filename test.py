@@ -315,7 +315,7 @@ def load_test():
         "сим выключи звук",
     ]
 
-    # Заглушки для всех внешних зависимостей, чтобы тест был быстрым и не зависел от сети
+    # Заглушки для всех внешних зависимостей, чтобы тест был быстрым и не зависел от интернета
     with patch('sim.find_info', return_value="заглушка"), \
          patch('sim.get_weather', return_value="заглушка погода"), \
          patch('sim.speak'), \
@@ -324,11 +324,11 @@ def load_test():
          patch('sim.launch_app', return_value=True), \
          patch('sim.open_url'):
 
-        # Прогрев (один проход)
+        # Прогрев
         for cmd in full_commands:
             if sim.contains_wake_word(cmd):
                 cmd_text = sim.extract_command(cmd)
-                sim.try_quick_command(cmd_text)  # это всё равно вызовет замоканные функции
+                sim.try_quick_command(cmd_text)
 
         # Замер памяти до
         mem_before = get_memory_mb()
