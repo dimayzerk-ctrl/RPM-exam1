@@ -109,7 +109,7 @@ def test_verification():
 
         # Обработка ошибки UnknownValueError
         mock_recognize.side_effect = sim.sr.UnknownValueError()
-        # Также нужно замокать повторную попытку внутри listen_once, чтобы не ждать реальный микрофон
+        #нужно сделать повторную попытку внутри listen_once, чтобы не ждать реальный микрофон
         with patch('speech_recognition.Recognizer.listen') as mock_listen:
             mock_listen.return_value = MagicMock()
             result = sim.listen_once(timeout=1)
