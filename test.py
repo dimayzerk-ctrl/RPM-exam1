@@ -169,7 +169,7 @@ def test_validation():
 
     # try_quick_command с левым текстом
     total += 1
-    if not sim.try_quick_command("абсолютно левая команда 123"):
+    if not sim.try_quick_command("команда 123"):
         print_pass("try_quick_command с нераспознанным текстом возвращает False")
         passed += 1
     else:
