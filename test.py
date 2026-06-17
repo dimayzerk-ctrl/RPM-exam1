@@ -17,13 +17,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import sim
 
 #импорт psutil для замера памяти
-try:
-    import psutil
-    HAS_PSUTIL = True
-except ImportError:
-    HAS_PSUTIL = False
-    print("[WARN] psutil не установлен, замер памяти будет приблизительным (используется /proc/self/statm или фикция)")
-
+import psutil
 # ──────────────────────────────────────────────────────────────────────────────
 # Вспомогательные функции для консольного вывода
 # ──────────────────────────────────────────────────────────────────────────────
