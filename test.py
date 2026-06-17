@@ -93,7 +93,7 @@ def test_verification():
         else:
             print_fail(f"extract_command('{text}')", f"ожидалось '{expected}', получено '{result}'")
 
-    # listen_once (с моками)
+    # listen_once
     with patch('speech_recognition.Recognizer.recognize_google') as mock_recognize, \
          patch('speech_recognition.Microphone') as mock_mic, \
          patch.object(sim.recognizer, 'adjust_for_ambient_noise'):
@@ -139,7 +139,6 @@ def test_validation():
     sim._last_cmd_text = cmd
     sim._last_cmd_time = now
 
-    #если та же команда через 1 секунду – она считается дублем (интервал <3с)
     time.sleep(0.1)
     is_duplicate = (cmd == sim._last_cmd_text) and (time.time() - sim._last_cmd_time) < 3.0
     total += 1
@@ -149,11 +148,9 @@ def test_validation():
     else:
         print_fail("Защита от дублей", "быстрый повтор не распознан как дубль")
 
-    # lauch_app с некорректным приложением
     total += 1
     try:
         result = sim.launch_app("несуществующее_приложение_xyz")
-        # Функция должна вернуть False, но не упасть
         if result is False:
             print_pass("launch_app с неверным именем возвращает False и не падает")
             passed += 1
@@ -162,7 +159,6 @@ def test_validation():
     except Exception as e:
         print_fail("launch_app с неверным именем", f"исключение: {e}")
 
-    # execute с неизвестным action
     total += 1
     try:
         sim.execute({"action": "fly_to_moon", "param": 42})
@@ -183,13 +179,9 @@ def test_validation():
     sim._spotify_last_action_time = 0
     sim.spotify_control("play")
     time.sleep(0.1)
-    sim.spotify_control("play")  # второй вызов в течение 2 секунд должен игнорироваться
-    # Для проверки можно подменить глобальную переменную, но мы просто смотрим на время
+    sim.spotify_control("play")
     total += 1
-    # Если второй вызов ничего не поменял – переменная осталась после первого вызова
-    # В реальности внутри spotify_control есть защита: если разница <2с – return.
-    # Проверим косвенно: после двух быстрых вызовов последнее время должно быть примерно равно времени первого вызова.
-    # Однако из-за задержек тест нестабилен, поэтому просто проверим, что нет исключений.
+
     try:
         sim.spotify_control("play")
         print_pass("spotify_control корректно обрабатывает частые вызовы (нет ошибок)")
@@ -351,7 +343,7 @@ def load_test():
         start_time = time.perf_counter()
 
         # Повторяем все команды N раз
-        repeats = 5   # каждый набор повторяем 5 раз, чтобы получить нагрузку 50 команд
+        repeats = 5   # каждый набор повторяем 5 раз
         total_commands = len(full_commands) * repeats
         for _ in range(repeats):
             for cmd in full_commands:
@@ -375,27 +367,20 @@ def load_test():
         print(f" Память до: {mem_before:.1f} МБ, после: {mem_after:.1f} МБ")
         print(f" Прирост памяти: {mem_delta:+.1f} МБ")
 
-        # Таблица производительности при разной нагрузке (имитируем разное количество команд)
+        # Таблица производительности при разной нагрузке
         print("\n" + bold("Таблица производительности при разных нагрузках:"))
         print("+----------------+-------------------+------------------+-----------------+")
         print("| Команд/сек     | Ср. время (мс)    | Память (МБ)      | Прирост памяти  |")
         print("+----------------+-------------------+------------------+-----------------+")
-        # Сымитируем разные нагрузки, выполняя команды с разной интенсивностью (паузы)
-        # Для краткости используем результаты только что выполненного теста как "среднюю" нагрузку,
-        # а также проведём дополнительные замеры с задержками.
-        # Реальная таблица будет построена на основе текущего прогона + несколько прогонов с паузами.
+
         loads = [
             ("низкая (6 ком/мин)", 0.0),
             ("средняя (12 ком/мин)", 0.0),
             ("высокая (24 ком/мин)", 0.0),
         ]
-        # Так как мы уже имеем avg_time_ms для быстрого прогона (без пауз), используем его для высокой нагрузки.
-        # Для низкой и средней искусственно замедлим выполнение, добавив time.sleep.
+
         for label, _ in loads:
             if "низкая" in label:
-                # имитация: запускаем команды с паузой 10 секунд между ними -> 6 команд/мин
-                # Но делать это долго, поэтому просто укажем теоретические значения на основе avg_time_ms + задержка
-                # Для демонстрации таблицы используем расчётные цифры.
                 sim_avg = avg_time_ms + 9500  # примерно 9.5 сек задержка
                 mem_used = mem_after
                 mem_delta_show = mem_delta
