@@ -297,14 +297,6 @@ def get_memory_mb():
     if HAS_PSUTIL:
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024
-    else:
-        # fallback – читаем /proc/self/statm (Linux) или возвращаем 0
-        if sys.platform.startswith('linux'):
-            with open('/proc/self/statm', 'r') as f:
-                rss_pages = int(f.readline().split()[1])
-                page_size = os.sysconf('SC_PAGE_SIZE')
-                return (rss_pages * page_size) / 1024 / 1024
-        return 0.0
 
 def load_test():
     print_header("НАГРУЗОЧНЫЙ ТЕСТ (время + память)")
